@@ -6,10 +6,7 @@ import com.jjang051.jpamember.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/members")
@@ -27,7 +24,19 @@ public class MemberController {
             ) {
         memberService.join(request);
 
-        return  ResponseEntity.ok("회원가입 성공");
+        return  ResponseEntity.ok("회원가입 성공");   //JSON 회원가입
 
+    }
+
+    @PostMapping("/form-data")
+    public ResponseEntity<String> joinFormData(
+            @Valid
+            @ModelAttribute
+
+            MemberJoinRequest request
+    ) {
+        memberService.join(request);
+
+        return ResponseEntity.ok("FormData 회원가입 성공");
     }
 }

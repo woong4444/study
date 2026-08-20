@@ -53,16 +53,24 @@ public class Member {
     )
     private String email;
 
+    @Column(
+            name = "PROFILE_IMAGE",
+            length = 255
+    )
+    private String profileImage;
+
     public Member(
             String loginId,
             String password,
             String name,
-            String email
+            String email,
+            String profileImage
     ) {
         this.loginId = loginId;
         this.password = password;
         this.name = name;
         this.email = email;
+        this.profileImage = profileImage;
     }
 }
 
