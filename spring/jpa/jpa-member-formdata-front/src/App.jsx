@@ -1,31 +1,47 @@
+import { useState } from "react";
 import { Toaster } from "react-hot-toast";
+
 import Join from "./pages/Join";
+import Login from "./pages/Login";
+import LoginResponse from "./pages/LoginResponse";
 
 function App() {
+  const [page, setPage] = useState("login");
+
   return (
     <>
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          duration: 2500,
+      <Toaster position="top-center" />
 
-          style: {
-            fontSize: "15px",
-            padding: "14px 18px",
-            borderRadius: "10px",
-          },
+      <div>
+        <button
+          onClick={() => {
+            setPage("login");
+          }}
+        >
+          로그인
+        </button>
 
-          success: {
-            duration: 2000,
-          },
+        <button
+          onClick={() => {
+            setPage("join");
+          }}
+        >
+          회원가입
+        </button>
 
-          error: {
-            duration: 3000,
-          },
-        }}
-      />
+        <button
+          onClick={() => {
+            setPage("loginResponse");
+          }}
+        >
+          회원정보 로그인
+        </button>
+      </div>
+      {page === "login" && <Login />}
 
-      <Join />
+      {page === "join" && <Join />}
+
+      {page === "loginResponse" && <LoginResponse />}
     </>
   );
 }

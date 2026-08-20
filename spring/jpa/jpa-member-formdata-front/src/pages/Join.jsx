@@ -9,6 +9,41 @@ function Join() {
 
   const [profile, setProfile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [idMessage, setIdMessage] = useState("");
+  const [idAvailable, setIdAvailable] = useState(false);
+
+  const handleLoginId = async (e) => {
+    const value = e.target.value;
+
+    setLoginId(value);
+
+    if (value.trim() === "") {
+      setIdMessage("");
+      setIdAvailable(false);
+
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/members/check-loginid?loginId=${value}`,
+      );
+      const data = await response.json();
+
+      if (data.available) {
+        setIdMessage("사용 가능한 아이디입니다.");
+        setIdAvailable(true);
+      } else {
+        setIdMessage("이미 사용 중인 아이디입니다.");
+        setIdAvailable(false);
+      }
+    } catch (error) {
+      console.error(error);
+
+      setIdMessage("아이디 확인에 실패했습니다.");
+      setIdAvailable(false);
+    }
+  };
 
   const handleImage = (e) => {
     const file = e.target.files[0];
@@ -21,6 +56,12 @@ function Join() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!idAvailable) {
+      toast.error("사용 가능한 아이디를 입력해주세요.");
+
+      return;
+    }
 
     const memberData = new FormData();
 
@@ -67,6 +108,8 @@ function Join() {
       setEmail("");
       setProfile(null);
       setPreview(null);
+      setIdMessage("");
+      setIdAvailable(false);
     } catch (error) {
       console.error(error);
       alert("서버 연결에 실패했습니다.");
@@ -83,11 +126,11 @@ function Join() {
           <input
             type="text"
             value={loginId}
-            onChange={(e) => {
-              setLoginId(e.target.value);
-            }}
+            onChange={handleLoginId}
             placeholder="아이디를 입력하세요"
           />
+
+          {idMessage && <p>{idMessage}</p>}
         </div>
 
         <div>
@@ -146,4 +189,5 @@ function Join() {
     </div>
   );
 }
+
 export default Join;

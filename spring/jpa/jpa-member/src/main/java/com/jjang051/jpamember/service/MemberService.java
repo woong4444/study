@@ -2,9 +2,12 @@ package com.jjang051.jpamember.service;
 
 
 import com.jjang051.jpamember.dto.MemberJoinRequest;
+import com.jjang051.jpamember.dto.MemberLoginRequest;
+import com.jjang051.jpamember.dto.MemberLoginResponse;
 import com.jjang051.jpamember.entity.Member;
 import com.jjang051.jpamember.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +21,8 @@ import java.util.UUID;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public void join(MemberJoinRequest request) {
@@ -75,16 +80,76 @@ public class MemberService {
             }
         }
 
+        String encodedPassword =
+                passwordEncoder.encode(request.getPassword());
+
         Member member = new Member(
                 request.getLoginId(),
-                request.getPassword(),
+                encodedPassword,
                 request.getName(),
                 request.getEmail(),
                 savedFileName
         );
 
         memberRepository.save(member);
+    }
 
-        memberRepository.save(member);
+    public boolean existsLoginId(String loginId) {
+
+        return memberRepository.existsByLoginId(loginId);
+    }
+
+    public void login(MemberLoginRequest request) {
+
+        Member member = memberRepository
+                .findByLoginId(request.getLoginId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "아이디 또는 비밀번호가 일치하지 않습니다."
+                        )
+                );
+
+        boolean passwordMatch = passwordEncoder.matches(
+                request.getPassword(),
+                member.getPassword()
+        );
+        System.out.println("loginId = " + request.getLoginId());
+        System.out.println("passwordMatch = " + passwordMatch);
+
+        if(!passwordMatch) {
+            throw new IllegalArgumentException(
+                    "아이디 또는 비밀번호가 일치하지 않습니다."
+            );
+        }
+    }
+
+    public MemberLoginResponse loginWithResponse(
+            MemberLoginRequest request
+    ) {
+        Member member = memberRepository
+                .findByLoginId(request.getLoginId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "아이디 또는 비밀번호가 일치하지 않습니다."
+                        )
+                );
+        boolean passwordMatch = passwordEncoder.matches(
+                request.getPassword(),
+                member.getPassword()
+        );
+
+        if(!passwordMatch) {
+            throw new IllegalArgumentException(
+                    "아이디 또는 비밀번호가 일치하지 않습니다."
+            );
+        }
+
+        return new MemberLoginResponse(
+                member.getId(),
+                member.getLoginId(),
+                member.getName(),
+                member.getEmail(),
+                member.getProfileImage()
+        );
     }
 }
